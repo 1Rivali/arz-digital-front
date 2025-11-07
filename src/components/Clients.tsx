@@ -30,7 +30,7 @@ const Clients = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const scrollSpeed = 3; // Increased from 1.5 for faster movement
+  const scrollSpeed = 5; // Increased for faster autoplay
   const animationRef = useRef<number>();
   const lastFrameTime = useRef<number>(0);
   const frameDuration = 1000 / 60; // 60fps
@@ -42,6 +42,24 @@ const Clients = () => {
     const slider = sliderRef.current;
     let animationId: number;
     let isScrolling = true;
+    let isUserScrolling = false;
+    let resumeTimeout: NodeJS.Timeout;
+
+    const pauseAutoscroll = () => {
+      isUserScrolling = true;
+      setIsPaused(true);
+      clearTimeout(resumeTimeout);
+      resumeTimeout = setTimeout(() => {
+        isUserScrolling = false;
+        setIsPaused(false);
+      }, 3000); // Resume autoscroll after 3 seconds of inactivity
+    };
+
+    const handleWheel = () => {
+      if (!isUserScrolling) {
+        pauseAutoscroll();
+      }
+    };
 
     const animate = (timestamp: number) => {
       if (!lastFrameTime.current) lastFrameTime.current = timestamp;
@@ -65,6 +83,9 @@ const Clients = () => {
       animationId = requestAnimationFrame(animate);
     };
 
+    // Add wheel event for mouse wheel scrolling
+    slider.addEventListener('wheel', handleWheel);
+
     // Start animation with timestamp
     animationId = requestAnimationFrame((timestamp) => {
       lastFrameTime.current = timestamp;
@@ -73,11 +94,15 @@ const Clients = () => {
 
     // Handle hover
     const handleMouseEnter = () => {
-      setIsPaused(true);
+      if (!isUserScrolling) {
+        setIsPaused(true);
+      }
     };
 
     const handleMouseLeave = () => {
-      setIsPaused(false);
+      if (!isUserScrolling) {
+        setIsPaused(false);
+      }
       setIsDown(false);
     };
 
@@ -86,28 +111,68 @@ const Clients = () => {
 
     return () => {
       cancelAnimationFrame(animationId);
+      clearTimeout(resumeTimeout);
+      slider.removeEventListener('wheel', handleWheel);
       slider.removeEventListener('mouseenter', handleMouseEnter);
       slider.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, [isPaused, isDown]);
 
   // Handle click and drag
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleStart = (clientX: number) => {
     if (!sliderRef.current) return;
     setIsDown(true);
-    setStartX(e.pageX - sliderRef.current.offsetLeft);
+    setIsPaused(true);
+    setStartX(clientX - sliderRef.current.offsetLeft);
     setScrollLeft(sliderRef.current.scrollLeft);
   };
 
-  const handleMouseUp = () => {
+  const handleEnd = () => {
     setIsDown(false);
+    // Don't resume autoscroll immediately after drag ends
+    // It will be handled by the resumeTimeout in the effect
+  };
+
+  const handleMove = (clientX: number) => {
+    if (!isDown || !sliderRef.current) return;
+    const x = clientX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 3;
+    sliderRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    handleStart(e.pageX);
+  };
+
+  const handleMouseUp = () => {
+    handleEnd();
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown || !sliderRef.current) return;
+    if (!isDown) return;
     e.preventDefault();
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 3;
+    handleMove(e.pageX);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!sliderRef.current) return;
+    const touch = e.touches[0];
+    setIsDown(true);
+    setIsPaused(true);
+    setStartX(touch.clientX - sliderRef.current.offsetLeft);
+    setScrollLeft(sliderRef.current.scrollLeft);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDown(false);
+    // Let the effect handle resuming autoscroll after delay
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDown || !sliderRef.current) return;
+    const touch = e.touches[0];
+    const x = touch.clientX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Reduced multiplier for better touch control
     sliderRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -128,11 +193,23 @@ const Clients = () => {
 
           <div
             ref={sliderRef}
-            className="flex overflow-x-hidden py-4 cursor-grab select-none will-change-transform"
+            className="flex py-4 cursor-grab select-none will-change-transform custom-scrollbar"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x',
+              overflowX: 'auto',
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none',
+
+            }}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseMove={handleMouseMove}
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchMove}
+            onTouchCancel={handleTouchEnd}
           >
             <div className="flex">
               {[...clients, ...clients].map((client, index) => (
@@ -155,11 +232,12 @@ const Clients = () => {
             </div>
           </div>
           <style>{`
-            [class*="overflow-x"] {
+            [class*="overflow-x"], .custom-scrollbar {
               scrollbar-width: none;
               -ms-overflow-style: none;
             }
-            [class*="overflow-x"]::-webkit-scrollbar {
+            [class*="overflow-x"]::-webkit-scrollbar,
+            .custom-scrollbar::-webkit-scrollbar {
               display: none;
             }
           `}</style>
