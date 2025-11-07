@@ -27,9 +27,9 @@ const Index = () => {
         <TechStack />
       </section>
       <Process />
-      <section id="projects">
+      {/* <section id="projects">
         <Projects />
-      </section>
+      </section> */}
       <section id="testimonials">
         <Testimonials />
       </section>

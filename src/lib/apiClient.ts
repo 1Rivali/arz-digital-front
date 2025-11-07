@@ -11,7 +11,7 @@ export interface ApiResponse<T> {
 }
 
 const apiClient = axios.create({
-  baseURL: "https://api.aperevolutionzone.com/api",
+  baseURL: "https://api.aperevolutionzone.com",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

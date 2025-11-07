@@ -26,8 +26,8 @@ const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a 
-            href="#" 
+          <a
+            href="#"
             className="flex items-center focus:outline-none"
             onClick={(e) => {
               e.preventDefault();
@@ -62,12 +62,12 @@ const Navigation = () => {
             >
               Contact
             </a>
-            <a
+            {/* <a
               href="#projects"
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
             >
               Projects
-            </a>
+            </a> */}
             <a
               href="#testimonials"
               className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"

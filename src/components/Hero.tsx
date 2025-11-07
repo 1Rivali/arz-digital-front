@@ -64,7 +64,7 @@ const Hero = () => {
 
           <TextReveal delay={500}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center flex-wrap">
-              <Button
+              {/* <Button
                 size="lg"
                 variant="hero"
                 className="text-white group relative overflow-hidden glass-effect border-primary/30 hover:border-primary/60 transition-all duration-300 hover:scale-105 hover:text-black"
@@ -74,7 +74,7 @@ const Hero = () => {
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </Button>
+              </Button> */}
               <Button
                 size="lg"
                 variant="outline"

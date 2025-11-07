@@ -9,24 +9,24 @@ import { GridPattern } from "./GridPattern";
 const testimonials = [
   {
     quote:
-      "ARZ digital transformed our legacy systems into a modern, scalable platform. Their expertise in handling complex enterprise architecture is unmatched.",
-    author: "Sarah Chen",
-    role: "CTO",
-    company: "Fortune 500 Financial",
+      "In a matter of 4 days what we received exceeded our expectations. ARZ didn’t just build games they crafted immersive, branded experiences that perfectly combined entertainment with fintech. Their attention to detail, creative problem-solving, and dedication to our goals were evident at every stage. Visitors were thrilled, and the buzz around our booth was undeniable",
+    author: "Adel AlAteeq",
+    role: "CEO",
+    company: "Awaed",
   },
   {
     quote:
-      "Working with ARZ digital was a game-changer. They delivered a mobile app that handles millions of transactions daily with zero downtime.",
-    author: "Michael Rodriguez",
-    role: "VP of Engineering",
-    company: "Global Healthcare",
+      "What we received exceeded our expectations. ARZ didn’t just build games they crafted immersive, branded experiences that perfectly combined entertainment with fintech. Their attention to detail, creative problem-solving, and dedication to our goals were evident at every stage. Visitors were thrilled, and the buzz around our booth was undeniable",
+    author: "Sami Al-Helwah",
+    role: "Founder and CEO",
+    company: "Nana",
   },
   {
     quote:
-      "The level of craftsmanship and attention to detail is exceptional. They don't just build software—they engineer solutions that drive business growth.",
-    author: "Emily Watson",
-    role: "Chief Product Officer",
-    company: "Tech Unicorn",
+      "ARZ's UI/UX expertise transformed our digital presence. Their team not only identified critical pain points in our user journey but delivered innovative solutions that improved our conversion rates by 35%. Their attention to detail and user-centered approach made all the difference in creating a seamless and engaging experience for our customers.",
+    author: "Rim Al-Mazrou",
+    role: "Founder and CEO",
+    company: "Canldes",
   },
 ];
 
@@ -56,14 +56,14 @@ const Testimonials = () => {
           {testimonials.map((testimonial, index) => (
             <ScrollReveal key={index} delay={index * 150} direction="up">
               <GlowCard intensity="medium" className="h-full">
-                <Card className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-300 relative hover:-translate-y-2 group h-full overflow-hidden">
+                <Card className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-300 relative hover:-translate-y-2 group h-[500px] flex flex-col overflow-hidden">
                   {/* Hover glow effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   {/* Glowing border on hover */}
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0 rounded-lg opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
 
-                  <CardContent className="pt-8 pb-6 relative z-10">
+                  <CardContent className="pt-8 pb-6 relative z-10 flex flex-col h-full">
                     {/* Quote icon with glow effect */}
                     <div className="mb-4 relative">
                       <Quote className="h-8 w-8 text-primary/30 group-hover:text-primary/60 transition-all duration-300 group-hover:drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)]" />
@@ -82,7 +82,7 @@ const Testimonials = () => {
                     </div>
 
                     {/* Quote text */}
-                    <p className="text-muted-foreground mb-6 leading-relaxed italic group-hover:text-foreground/90 transition-colors duration-300">
+                    <p className="text-muted-foreground mb-6 leading-relaxed italic group-hover:text-foreground/90 transition-colors duration-300 flex-grow overflow-y-auto pr-2">
                       "{testimonial.quote}"
                     </p>
 
