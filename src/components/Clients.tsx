@@ -1,5 +1,6 @@
 import { TextReveal } from "./TextReveal";
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import shattibLogo from "@/assets/svg/companies/shattib-logo.svg";
 import pcaLogo from "@/assets/svg/companies/pca-logo.svg";
 import fcLogo from "@/assets/svg/companies/fc-logo.svg";
@@ -23,157 +24,27 @@ const clients = [
   { name: "candles", logo: candlesLogo, },
 ];
 
+const SCROLL_AMOUNT = 300; // pixels to scroll per click
+
 const Clients = () => {
-  const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isDown, setIsDown] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const scrollSpeed = 5; // Increased for faster autoplay
-  const animationRef = useRef<number>();
-  const lastFrameTime = useRef<number>(0);
-  const frameDuration = 1000 / 60; // 60fps
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll effect
-  useEffect(() => {
-    if (!sliderRef.current) return;
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
 
-    const slider = sliderRef.current;
-    let animationId: number;
-    let isScrolling = true;
-    let isUserScrolling = false;
-    let resumeTimeout: NodeJS.Timeout;
+    const scrollAmount = SCROLL_AMOUNT;
+    const currentScroll = scrollContainerRef.current.scrollLeft;
+    const maxScroll = scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth;
 
-    const pauseAutoscroll = () => {
-      isUserScrolling = true;
-      setIsPaused(true);
-      clearTimeout(resumeTimeout);
-      resumeTimeout = setTimeout(() => {
-        isUserScrolling = false;
-        setIsPaused(false);
-      }, 3000); // Resume autoscroll after 3 seconds of inactivity
-    };
+    const newPosition = direction === 'left'
+      ? Math.max(0, currentScroll - scrollAmount)
+      : Math.min(maxScroll, currentScroll + scrollAmount);
 
-    const handleWheel = () => {
-      if (!isUserScrolling) {
-        pauseAutoscroll();
-      }
-    };
-
-    const animate = (timestamp: number) => {
-      if (!lastFrameTime.current) lastFrameTime.current = timestamp;
-      const deltaTime = timestamp - lastFrameTime.current;
-
-      if (!isPaused && !isDown && deltaTime > frameDuration) {
-        lastFrameTime.current = timestamp;
-
-        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
-          // Reset to start immediately when reaching the end (no smooth to prevent stutter)
-          slider.scrollTo({ left: 0, behavior: 'auto' });
-        } else {
-          // Use requestAnimationFrame for smoother animation
-          const currentScroll = slider.scrollLeft;
-          slider.scrollTo({
-            left: currentScroll + scrollSpeed,
-            behavior: 'auto' // Using 'auto' for smoother performance
-          });
-        }
-      }
-      animationId = requestAnimationFrame(animate);
-    };
-
-    // Add wheel event for mouse wheel scrolling
-    slider.addEventListener('wheel', handleWheel);
-
-    // Start animation with timestamp
-    animationId = requestAnimationFrame((timestamp) => {
-      lastFrameTime.current = timestamp;
-      animate(timestamp);
+    scrollContainerRef.current.scrollTo({
+      left: newPosition,
+      behavior: 'smooth'
     });
-
-    // Handle hover
-    const handleMouseEnter = () => {
-      if (!isUserScrolling) {
-        setIsPaused(true);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      if (!isUserScrolling) {
-        setIsPaused(false);
-      }
-      setIsDown(false);
-    };
-
-    slider.addEventListener('mouseenter', handleMouseEnter);
-    slider.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      clearTimeout(resumeTimeout);
-      slider.removeEventListener('wheel', handleWheel);
-      slider.removeEventListener('mouseenter', handleMouseEnter);
-      slider.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [isPaused, isDown]);
-
-  // Handle click and drag
-  const handleStart = (clientX: number) => {
-    if (!sliderRef.current) return;
-    setIsDown(true);
-    setIsPaused(true);
-    setStartX(clientX - sliderRef.current.offsetLeft);
-    setScrollLeft(sliderRef.current.scrollLeft);
-  };
-
-  const handleEnd = () => {
-    setIsDown(false);
-    // Don't resume autoscroll immediately after drag ends
-    // It will be handled by the resumeTimeout in the effect
-  };
-
-  const handleMove = (clientX: number) => {
-    if (!isDown || !sliderRef.current) return;
-    const x = clientX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 3;
-    sliderRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    handleStart(e.pageX);
-  };
-
-  const handleMouseUp = () => {
-    handleEnd();
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown) return;
-    e.preventDefault();
-    handleMove(e.pageX);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!sliderRef.current) return;
-    const touch = e.touches[0];
-    setIsDown(true);
-    setIsPaused(true);
-    setStartX(touch.clientX - sliderRef.current.offsetLeft);
-    setScrollLeft(sliderRef.current.scrollLeft);
-  };
-
-  const handleTouchEnd = () => {
-    setIsDown(false);
-    // Let the effect handle resuming autoscroll after delay
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDown || !sliderRef.current) return;
-    const touch = e.touches[0];
-    const x = touch.clientX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Reduced multiplier for better touch control
-    sliderRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
@@ -186,59 +57,69 @@ const Clients = () => {
           Trusted by Industry Leaders
         </TextReveal>
 
-        <div className="relative">
+        <div className="relative" ref={containerRef}>
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => handleScroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+
+          <button
+            onClick={() => handleScroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
+
           {/* Gradient fade on edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-24 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
           <div
-            ref={sliderRef}
-            className="flex py-4 cursor-grab select-none will-change-transform custom-scrollbar"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              touchAction: 'pan-x',
-              overflowX: 'auto',
-              msOverflowStyle: 'none',
-              scrollbarWidth: 'none',
-
-            }}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onTouchMove={handleTouchMove}
-            onTouchCancel={handleTouchEnd}
+            ref={scrollContainerRef}
+            className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center"
           >
-            <div className="flex">
-              {[...clients, ...clients].map((client, index) => (
-                <a
+            <div className="flex mx-auto md:mx-0">
+              {clients.map((client, index) => (
+                <div
                   key={`${client.name}-${index}`}
-                  href={client.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center h-20 px-8 mx-4 opacity-60 hover:opacity-100 transition-all duration-300 grayscale hover:grayscale-0 flex-shrink-0 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg"
-                  aria-label={`Visit ${client.name} website`}
+                  className="flex items-center justify-center h-16 md:h-20 px-4 md:px-8 mx-2 md:mx-4 opacity-60 hover:opacity-100 transition-all duration-300 grayscale hover:grayscale-0 flex-shrink-0 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg"
                 >
-                  <img
-                    src={client.logo}
-                    alt={client.name}
-                    className="h-full w-auto object-contain max-w-[150px] pointer-events-none"
-                    draggable="false"
-                  />
-                </a>
+                  <a
+                    href={client.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center h-full"
+                    aria-label={`Visit ${client.name} website`}
+                  >
+                    <img
+                      src={client.logo}
+                      alt={client.name}
+                      className="h-full w-auto max-h-12 md:max-h-16 object-contain pointer-events-none"
+                      draggable="false"
+                      loading={index > clients.length * 2 ? "eager" : "lazy"}
+                    />
+                  </a>
+                </div>
               ))}
             </div>
           </div>
           <style>{`
-            [class*="overflow-x"], .custom-scrollbar {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            [class*="overflow-x"]::-webkit-scrollbar,
-            .custom-scrollbar::-webkit-scrollbar {
+            .scrollbar-hide::-webkit-scrollbar {
               display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+            @media (max-width: 768px) {
+              .scrollbar-hide > div {
+                margin: 0 auto;
+              }
             }
           `}</style>
         </div>

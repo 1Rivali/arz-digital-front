@@ -7,6 +7,26 @@ const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Toggle body scroll lock when mobile menu opens/closes
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+
+    // Cleanup function to reset styles when component unmounts
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isMobileMenuOpen]);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -81,64 +101,62 @@ const Navigation = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 -mr-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6 text-foreground" />
-            ) : (
-              <Menu className="h-6 w-6 text-foreground" />
-            )}
+            <div className="relative w-6 h-6">
+              <span 
+                className={`absolute top-1/2 left-0 w-6 h-0.5 bg-foreground transition-all duration-300 ${
+                  isMobileMenuOpen ? 'rotate-45 -translate-y-1/2' : '-translate-y-2'
+                }`}
+              />
+              <span 
+                className={`absolute top-1/2 left-0 w-6 h-0.5 bg-foreground transition-all duration-300 ${
+                  isMobileMenuOpen ? 'opacity-0' : 'opacity-100'
+                }`}
+              />
+              <span 
+                className={`absolute top-1/2 left-0 w-6 h-0.5 bg-foreground transition-all duration-300 ${
+                  isMobileMenuOpen ? '-rotate-45 -translate-y-1/2' : 'translate-y-1.5'
+                }`}
+              />
+            </div>
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden pb-6 animate-fade-in">
-            <div className="flex flex-col gap-4">
-              <a
-                href="#services"
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Services
-              </a>
-              <a
-                href="#tech"
-                className="text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Technology
-              </a>
-              <a
-                href="#contact"
-                className="text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Contact
-              </a>
-              <a
-                href="#projects"
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Projects
-              </a>
-              <a
-                href="#testimonials"
-                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Testimonials
-              </a>
-              <Button variant="outline" size="sm" className="w-full" asChild>
-                <a href="#contact" onClick={() => setIsMobileMenuOpen(false)}>
-                  Contact Us
+        <div 
+          className={`fixed inset-0 z-40 transition-all duration-300 ease-in-out transform ${
+            isMobileMenuOpen 
+              ? 'translate-y-0 bg-background/90 backdrop-blur-lg' 
+              : '-translate-y-full bg-transparent pointer-events-none'
+          } pt-24 px-6 md:hidden`}
+          style={{
+            height: '100vh',
+            top: '80px', // Height of the header
+          }}
+        >
+          <div className="flex flex-col h-full">
+            <nav className="flex-1 space-y-1">
+              {[
+                { href: '#services', label: 'Services' },
+                { href: '#tech', label: 'Technology' },
+                { href: '#testimonials', label: 'Testimonials' },
+                { href: '#contact', label: 'Contact' },
+              ].map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="block py-4 px-4 -mx-4 text-lg font-medium text-foreground/90 hover:bg-foreground/5 rounded-lg transition-colors duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.label}
                 </a>
-              </Button>
-            </div>
+              ))}
+            </nav>
           </div>
-        )}
+        </div>
       </div>
     </nav>
   );
