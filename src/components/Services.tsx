@@ -52,7 +52,7 @@ const Services = () => {
             <ScrollReveal key={index} delay={index * 100} direction="up">
               <GlowCard intensity="medium" className="h-full">
                 <Card 
-                  className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden h-full"
+                  className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-500 hover:-translate-y-2 group relative overflow-hidden h-full flex flex-col"
                 >
                   {/* Animated gradient overlay on hover */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -67,7 +67,7 @@ const Services = () => {
                     <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
                       {service.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="text-muted-foreground text-sm leading-relaxed min-h-[120px]">
                       {service.description}
                     </p>
                   </CardContent>

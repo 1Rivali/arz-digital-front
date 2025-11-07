@@ -60,7 +60,7 @@ const Process = () => {
           {steps.map((step, index) => (
             <ScrollReveal key={index} delay={index * 100} direction="up">
               <GlowCard intensity="low" className="h-full">
-                <Card className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-300 group relative overflow-hidden hover:-translate-y-2 h-full">
+                <Card className="card-shadow glass-effect border-primary/20 hover:border-primary/50 transition-all duration-300 group relative overflow-hidden hover:-translate-y-2 h-full flex flex-col">
                   {/* Number Background with Glow */}
                   <div className="absolute top-0 right-0 text-9xl font-bold text-primary/5 leading-none -mr-4 -mt-4 group-hover:text-primary/10 group-hover:drop-shadow-[0_0_20px_hsl(var(--primary)/0.3)] transition-all duration-300">
                     {step.number}
@@ -70,10 +70,10 @@ const Process = () => {
                     <div className="mb-4 inline-flex p-3 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/50 transition-all duration-300">
                       <step.icon className="h-6 w-6" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="text-xl font-semibold mb-4 group-hover:text-primary transition-colors">
                       {step.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="text-muted-foreground text-sm leading-relaxed flex-1">
                       {step.description}
                     </p>
                   </CardContent>

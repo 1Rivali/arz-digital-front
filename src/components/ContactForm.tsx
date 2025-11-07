@@ -1,7 +1,11 @@
 'use client';
 
+import { postContacts } from '@/apiRequests/ContactUs';
+import { ContactRequest } from '@/types/ContactUs';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useToast } from '@/components/ui/use-toast';
 import * as z from 'zod';
 import { Button } from './ui/button';
 import {
@@ -14,7 +18,6 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
-import { toast } from './ui/use-toast';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -23,12 +26,9 @@ const formSchema = z.object({
   email: z.string().email({
     message: 'Please enter a valid email address.',
   }),
-  subject: z.string().min(5, {
-    message: 'Subject must be at least 5 characters.',
-  }),
   message: z.string().min(10, {
     message: 'Message must be at least 10 characters.',
-  }),
+  })
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -39,23 +39,30 @@ export const ContactForm = () => {
     defaultValues: {
       name: '',
       email: '',
-      subject: '',
       message: '',
     },
   });
 
-  async function onSubmit(data: FormValues) {
-    try {
-      // Replace with your form submission logic
-      console.log('Form submitted:', data);
-      
+  const { toast } = useToast();
+
+  const { mutate: submitContact, isPending } = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const contactData: ContactRequest = {
+        name: data.name,
+        email: data.email,
+        message: data.message
+      };
+      return await postContacts(contactData);
+    },
+    onSuccess: () => {
       toast({
-        title: 'Message sent!',
-        description: 'We\'ll get back to you soon.',
+        title: 'Message Sent',
+        description: 'We\'ll get back to you soon!',
+        variant: 'default',
       });
-      
       form.reset();
-    } catch (error) {
+    },
+    onError: (error: Error) => {
       console.error('Error submitting form:', error);
       toast({
         title: 'Error',
@@ -63,13 +70,18 @@ export const ContactForm = () => {
         variant: 'destructive',
       });
     }
+  });
+
+  const onSubmit = (data: FormValues) => {
+    submitContact(data);
   }
 
   return (
     <div className="w-full">
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -97,21 +109,7 @@ export const ContactForm = () => {
               )}
             />
           </div>
-          
-          <FormField
-            control={form.control}
-            name="subject"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subject</FormLabel>
-                <FormControl>
-                  <Input placeholder="How can we help you?" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
+
           <FormField
             control={form.control}
             name="message"
@@ -119,19 +117,19 @@ export const ContactForm = () => {
               <FormItem>
                 <FormLabel>Message</FormLabel>
                 <FormControl>
-                  <Textarea 
-                    placeholder="Your message here..." 
-                    className="min-h-[150px]" 
-                    {...field} 
+                  <Textarea
+                    placeholder="Your message here..."
+                    className="min-h-[150px]"
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             className="w-full md:w-auto"
             disabled={form.formState.isSubmitting}
           >

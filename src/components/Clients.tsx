@@ -5,6 +5,9 @@ import pcaLogo from "@/assets/svg/companies/pca-logo.svg";
 import fcLogo from "@/assets/svg/companies/fc-logo.svg";
 import awaedLogo from "@/assets/svg/companies/awaed-logo.svg";
 import alphaLogo from "@/assets/svg/companies/alpha-logo.svg";
+import pscLogo from "@/assets/svg/companies/PSC-logo.svg";
+import nanaLogo from "@/assets/svg/companies/nana-logo-trasnparent 1.svg";
+import candlesLogo from "@/assets/svg/companies/candles-logo.svg";
 import Marquee from "react-fast-marquee";
 const clients = [
   { name: "Shattib", logo: shattibLogo },
@@ -12,12 +15,15 @@ const clients = [
   { name: "FC", logo: fcLogo },
   { name: "Awaed", logo: awaedLogo },
   { name: "Alpha", logo: alphaLogo },
+  { name: "PSC", logo: pscLogo },
+  { name: "nana", logo: nanaLogo },
+  { name: "candles", logo: candlesLogo },
 ];
 
 const Clients = () => {
   return (
     <section className="py-16 px-6 border-y border-border/30 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[90%] mx-auto">
         <TextReveal
           as="p"
           className="text-center text-muted-foreground text-sm uppercase tracking-wider mb-12"
