@@ -1,5 +1,5 @@
 import { TextReveal } from "./TextReveal";
-import { useRef, useEffect, useCallback, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import shattibLogo from "@/assets/svg/companies/shattib-logo.svg";
 import pcaLogo from "@/assets/svg/companies/pca-logo.svg";
@@ -29,39 +29,82 @@ const SCROLL_AMOUNT = 300; // pixels to scroll per click
 const Clients = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const animationRef = useRef<number>();
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (!scrollContainerRef.current || isPaused) return;
+
+    const container = scrollContainerRef.current;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    let scrollSpeed = 3; // pixels per frame (increased from 1.5)
+    let currentScroll = container.scrollLeft;
+    let direction = 1; // 1 for right, -1 for left
+
+    const animate = () => {
+      if (isPaused) return;
+
+      currentScroll += scrollSpeed * direction;
+
+      // Reverse direction at boundaries
+      if (currentScroll <= 0) {
+        currentScroll = 0;
+        direction = 1;
+      } else if (currentScroll >= maxScroll) {
+        currentScroll = maxScroll;
+        direction = -1;
+      }
+
+      container.scrollTo({
+        left: currentScroll,
+        behavior: 'auto'
+      });
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPaused]);
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
+
+    // Pause auto-scroll when manually navigating
+    setIsPaused(true);
 
     const container = scrollContainerRef.current;
     const scrollAmount = SCROLL_AMOUNT;
     const currentScroll = container.scrollLeft;
     const maxScroll = container.scrollWidth - container.clientWidth;
     const isAtStart = currentScroll <= 0;
-    const isAtEnd = currentScroll >= maxScroll - 5; // Small threshold for floating point imprecision
+    const isAtEnd = currentScroll >= maxScroll - 5;
 
     let newPosition: number;
 
     if (direction === 'left') {
-      if (isAtStart) {
-        // If at start and scrolling left, jump to the end
-        newPosition = maxScroll;
-      } else {
-        newPosition = Math.max(0, currentScroll - scrollAmount);
-      }
+      newPosition = isAtStart ? maxScroll : Math.max(0, currentScroll - scrollAmount);
     } else {
-      if (isAtEnd) {
-        // If at end and scrolling right, jump to the start
-        newPosition = 0;
-      } else {
-        newPosition = Math.min(maxScroll, currentScroll + scrollAmount);
-      }
+      newPosition = isAtEnd ? 0 : Math.min(maxScroll, currentScroll + scrollAmount);
     }
 
     container.scrollTo({
       left: newPosition,
       behavior: 'smooth'
     });
+
+    // Resume auto-scroll after a delay
+    const timer = setTimeout(() => {
+      setIsPaused(false);
+    }, 3000); // 3 seconds before resuming auto-scroll
+
+    return () => clearTimeout(timer);
   };
 
   return (
@@ -77,7 +120,12 @@ const Clients = () => {
         <div className="relative" ref={containerRef}>
           {/* Navigation Arrows */}
           <button
-            onClick={() => handleScroll('left')}
+            onClick={() => {
+              setIsPaused(true);
+              handleScroll('left');
+            }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
             aria-label="Scroll left"
           >
@@ -85,7 +133,12 @@ const Clients = () => {
           </button>
 
           <button
-            onClick={() => handleScroll('right')}
+            onClick={() => {
+              setIsPaused(true);
+              handleScroll('right');
+            }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
             aria-label="Scroll right"
           >
@@ -99,6 +152,8 @@ const Clients = () => {
           <div
             ref={scrollContainerRef}
             className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center px-12 md:px-16"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
           >
             <div className="flex mx-auto md:mx-0 pl-4 pr-4">
               {clients.map((client, index) => (
