@@ -30,11 +30,14 @@ const Clients = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
   const animationRef = useRef<number>();
+  const isScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout>();
 
   // Auto-scroll effect
   useEffect(() => {
-    if (!scrollContainerRef.current || isPaused) return;
+    if (!scrollContainerRef.current || isPaused || isStopped) return;
 
     const container = scrollContainerRef.current;
     const maxScroll = container.scrollWidth - container.clientWidth;
@@ -76,8 +79,8 @@ const Clients = () => {
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
 
-    // Pause auto-scroll when manually navigating
-    setIsPaused(true);
+    // Stop auto-scroll permanently when manually navigating
+    setIsStopped(true);
 
     const container = scrollContainerRef.current;
     const scrollAmount = SCROLL_AMOUNT;
@@ -99,12 +102,7 @@ const Clients = () => {
       behavior: 'smooth'
     });
 
-    // Resume auto-scroll after a delay
-    const timer = setTimeout(() => {
-      setIsPaused(false);
-    }, 3000); // 3 seconds before resuming auto-scroll
-
-    return () => clearTimeout(timer);
+    // No auto-resume after manual navigation
   };
 
   return (
@@ -125,7 +123,7 @@ const Clients = () => {
               handleScroll('left');
             }}
             onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseLeave={() => !isStopped && setIsPaused(false)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
             aria-label="Scroll left"
           >
@@ -138,7 +136,7 @@ const Clients = () => {
               handleScroll('right');
             }}
             onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseLeave={() => !isStopped && setIsPaused(false)}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 opacity-100"
             aria-label="Scroll right"
           >
@@ -151,9 +149,30 @@ const Clients = () => {
 
           <div
             ref={scrollContainerRef}
-            className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center px-12 md:px-16"
+            className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center px-12 md:px-16 touch-pan-x"
             onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            onMouseLeave={() => !isStopped && setIsPaused(false)}
+            onTouchStart={() => {
+              isScrolling.current = true;
+              setIsPaused(true);
+            }}
+            onTouchEnd={() => {
+              isScrolling.current = false;
+              if (!isStopped) {
+                setIsPaused(false);
+              }
+            }}
+            onScroll={() => {
+              if (isScrolling.current) {
+                setIsStopped(true);
+                if (scrollTimeout.current) {
+                  clearTimeout(scrollTimeout.current);
+                }
+                scrollTimeout.current = setTimeout(() => {
+                  isScrolling.current = false;
+                }, 100);
+              }
+            }}
           >
             <div className="flex mx-auto md:mx-0 pl-4 pr-4">
               {clients.map((client, index) => (
