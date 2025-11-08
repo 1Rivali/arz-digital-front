@@ -33,15 +33,32 @@ const Clients = () => {
   const handleScroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
 
+    const container = scrollContainerRef.current;
     const scrollAmount = SCROLL_AMOUNT;
-    const currentScroll = scrollContainerRef.current.scrollLeft;
-    const maxScroll = scrollContainerRef.current.scrollWidth - scrollContainerRef.current.clientWidth;
+    const currentScroll = container.scrollLeft;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const isAtStart = currentScroll <= 0;
+    const isAtEnd = currentScroll >= maxScroll - 5; // Small threshold for floating point imprecision
 
-    const newPosition = direction === 'left'
-      ? Math.max(0, currentScroll - scrollAmount)
-      : Math.min(maxScroll, currentScroll + scrollAmount);
+    let newPosition: number;
 
-    scrollContainerRef.current.scrollTo({
+    if (direction === 'left') {
+      if (isAtStart) {
+        // If at start and scrolling left, jump to the end
+        newPosition = maxScroll;
+      } else {
+        newPosition = Math.max(0, currentScroll - scrollAmount);
+      }
+    } else {
+      if (isAtEnd) {
+        // If at end and scrolling right, jump to the start
+        newPosition = 0;
+      } else {
+        newPosition = Math.min(maxScroll, currentScroll + scrollAmount);
+      }
+    }
+
+    container.scrollTo({
       left: newPosition,
       behavior: 'smooth'
     });
