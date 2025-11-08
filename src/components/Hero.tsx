@@ -81,7 +81,7 @@ const Hero = () => {
                 className="group glass-effect border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 hover:scale-105"
                 asChild
               >
-                <a href="#projects">
+                <a href="#tech">
                   <Sparkles className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
                   View Our Work
                 </a>
