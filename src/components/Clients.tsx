@@ -76,33 +76,35 @@ const Clients = () => {
           </button>
 
           {/* Gradient fade on edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-24 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-24 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
           <div
             ref={scrollContainerRef}
-            className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center"
+            className="flex py-4 select-none overflow-x-auto scrollbar-hide items-center px-12 md:px-16"
           >
-            <div className="flex mx-auto md:mx-0">
+            <div className="flex mx-auto md:mx-0 pl-4 pr-4">
               {clients.map((client, index) => (
                 <div
                   key={`${client.name}-${index}`}
-                  className="flex items-center justify-center h-16 md:h-20 px-4 md:px-8 mx-2 md:mx-4 opacity-60 hover:opacity-100 transition-all duration-300 grayscale hover:grayscale-0 flex-shrink-0 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg"
+                  className="flex items-center justify-center h-16 md:h-20 px-4 md:px-8 mx-2 md:mx-4 opacity-80 hover:opacity-100 transition-all duration-300 flex-shrink-0 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-lg"
                 >
                   <a
                     href={client.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center h-full"
+                    className="flex items-center justify-center w-full h-full"
                     aria-label={`Visit ${client.name} website`}
                   >
-                    <img
-                      src={client.logo}
-                      alt={client.name}
-                      className="h-full w-auto max-h-12 md:max-h-16 object-contain pointer-events-none"
-                      draggable="false"
-                      loading={index > clients.length * 2 ? "eager" : "lazy"}
-                    />
+                    <div className="relative w-24 h-16 md:w-32 md:h-20 flex items-center justify-center">
+                      <img
+                        src={client.logo}
+                        alt={client.name}
+                        className="max-h-[80%] max-w-[90%] w-auto h-auto object-contain object-center pointer-events-none"
+                        draggable="false"
+                        loading={index > clients.length * 2 ? "eager" : "lazy"}
+                      />
+                    </div>
                   </a>
                 </div>
               ))}
